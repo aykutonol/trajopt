@@ -37,7 +37,7 @@ enum TermType {
     TermInfoPtr out(new classname());\
     return out;\
   }
-  
+
 
 /**
  * Holds all the data for a trajectory optimization problem
@@ -123,7 +123,7 @@ struct TRAJOPT_API TermInfo  {
   TermType term_type;
   virtual void fromJson(const Json::Value& v)=0;
   virtual void hatch(TrajOptProb& prob) = 0;
-  
+
 
   static TermInfoPtr fromName(const string& type);
 
@@ -264,6 +264,7 @@ joint-space position constraint
 struct JointConstraintInfo : public TermInfo, public MakesConstraint {
   /// joint values. list of length 1 automatically gets expanded to list of length n_dof
   DblVec vals;
+  DblVec coeffs;
   /// which timestep. default = n_timesteps - 1
   int timestep;
   void fromJson(const Value& v);

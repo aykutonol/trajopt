@@ -39,7 +39,7 @@ void ensure_only_members(const Value& v, const char** fields, int nvalid) {
     if (!valid) {
       PRINT_AND_THROW( boost::format("invalid field found: %s")%it.memberName());
     }
-  } 
+  }
 }
 
 
@@ -135,12 +135,12 @@ void fromJson(const Json::Value& v, TermInfoPtr& term) {
   LOG_DEBUG("reading term: %s", type.c_str());
   term = TermInfo::fromName(type);
   if (gReadingCosts) {
-    if (!term) PRINT_AND_THROW( boost::format("failed to construct cost named %s")%type );    
+    if (!term) PRINT_AND_THROW( boost::format("failed to construct cost named %s")%type );
     if (!dynamic_cast<MakesCost*>(term.get())) PRINT_AND_THROW( boost::format("%s is only a constraint, but you listed it as a cost")%type) ;
     term->term_type = TT_COST;
   }
   else if (gReadingConstraints) {
-    if (!term) PRINT_AND_THROW( boost::format("failed to construct constraint named %s")%type );        
+    if (!term) PRINT_AND_THROW( boost::format("failed to construct constraint named %s")%type );
     if (!dynamic_cast<MakesConstraint*>(term.get())) PRINT_AND_THROW( boost::format("%s is only a cost, but you listed it as a constraint")%type);
     term->term_type = TT_CNT;
   }
@@ -302,7 +302,7 @@ TrajOptProbPtr ConstructProblem(const Json::Value& root, OpenRAVE::EnvironmentBa
 }
 
 
-TrajOptProb::TrajOptProb(int n_steps, ConfigurationPtr rad) : m_rad(rad) {  
+TrajOptProb::TrajOptProb(int n_steps, ConfigurationPtr rad) : m_rad(rad) {
   DblVec lower, upper;
   m_rad->GetDOFLimits(lower, upper);
   int n_dof = m_rad->GetDOF();
@@ -344,7 +344,7 @@ void SetupPlotting(TrajOptProb& prob, Optimizer& opt) {
 
 void PoseCostInfo::fromJson(const Value& v) {
   FAIL_IF_FALSE(v.isMember("params"));
-  const Value& params = v["params"];  
+  const Value& params = v["params"];
   childFromJson(params, timestep, "timestep", gPCI->basic_info.n_steps-1);
   childFromJson(params, xyz,"xyz");
   childFromJson(params, wxyz,"wxyz");
@@ -391,15 +391,15 @@ void JointPosCostInfo::fromJson(const Value& v) {
     PRINT_AND_THROW( boost::format("wrong number of dof vals. expected %i got %i")%n_dof%vals.size());
   }
   childFromJson(params, timestep, "timestep", gPCI->basic_info.n_steps-1);
-  
+
   const char* all_fields[] = {"vals", "coeffs", "timestep"};
   ensure_only_members(params, all_fields, sizeof(all_fields)/sizeof(char*));
-  
-  
+
+
 }
 void JointPosCostInfo::hatch(TrajOptProb& prob) {
   prob.addCost(CostPtr(new JointPosCost(prob.GetVarRow(timestep), toVectorXd(vals), toVectorXd(coeffs))));
-  prob.getCosts().back()->setName(name);  
+  prob.getCosts().back()->setName(name);
 }
 
 
@@ -419,19 +419,19 @@ void CartVelCntInfo::fromJson(const Value& v) {
   if (!link) {
     PRINT_AND_THROW( boost::format("invalid link name: %s")%linkstr);
   }
-  
+
   const char* all_fields[] = {"first_step", "last_step", "max_displacement","link"};
   ensure_only_members(params, all_fields, sizeof(all_fields)/sizeof(char*));
-  
-  
+
+
 }
 
 void CartVelCntInfo::hatch(TrajOptProb& prob) {
   for (int iStep = first_step; iStep < last_step; ++iStep) {
     prob.addConstraint(ConstraintPtr(new ConstraintFromFunc(
       VectorOfVectorPtr(new CartVelCalculator(prob.GetRAD(), link, max_displacement)),
-       MatrixOfVectorPtr(new CartVelJacCalculator(prob.GetRAD(), link, max_displacement)), 
-      concat(prob.GetVarRow(iStep), prob.GetVarRow(iStep+1)), VectorXd::Ones(0), INEQ, "CartVel")));     
+       MatrixOfVectorPtr(new CartVelJacCalculator(prob.GetRAD(), link, max_displacement)),
+      concat(prob.GetVarRow(iStep), prob.GetVarRow(iStep+1)), VectorXd::Ones(0), INEQ, "CartVel")));
   }
 }
 
@@ -445,11 +445,11 @@ void JointVelCostInfo::fromJson(const Value& v) {
   else if (coeffs.size() != n_dof) {
     PRINT_AND_THROW( boost::format("wrong number of coeffs. expected %i got %i")%n_dof%coeffs.size());
   }
-  
+
   const char* all_fields[] = {"coeffs"};
   ensure_only_members(params, all_fields, sizeof(all_fields)/sizeof(char*));
-  
-  
+
+
 }
 
 void JointVelCostInfo::hatch(TrajOptProb& prob) {
@@ -461,19 +461,19 @@ void JointVelCostInfo::hatch(TrajOptProb& prob) {
 void JointVelConstraintInfo::fromJson(const Value& v) {
   FAIL_IF_FALSE(v.isMember("params"));
   const Value& params = v["params"];
-  
-  int n_steps = gPCI->basic_info.n_steps;  
-  int n_dof = gPCI->rad->GetDOF();  
+
+  int n_steps = gPCI->basic_info.n_steps;
+  int n_dof = gPCI->rad->GetDOF();
   childFromJson(params, vals, "vals");
   childFromJson(params, first_step, "first_step", 0);
   childFromJson(params, last_step, "last_step", n_steps-1);
   FAIL_IF_FALSE(vals.size() == n_dof);
   FAIL_IF_FALSE((first_step >= 0) && (first_step < n_steps));
   FAIL_IF_FALSE((last_step >= first_step) && (last_step < n_steps));
-  
+
   const char* all_fields[] = {"vals", "first_step", "last_step"};
-  ensure_only_members(params, all_fields, sizeof(all_fields)/sizeof(char*));  
-  
+  ensure_only_members(params, all_fields, sizeof(all_fields)/sizeof(char*));
+
 }
 void JointVelConstraintInfo::hatch(TrajOptProb& prob) {
   for (int i = first_step; i <= last_step-1; ++i) {
@@ -508,10 +508,10 @@ void CollisionCostInfo::fromJson(const Value& v) {
   else if (dist_pen.size() != n_terms) {
     PRINT_AND_THROW(boost::format("wrong size: dist_pen. expected %i got %i")%n_terms%dist_pen.size());
   }
-  
+
   const char* all_fields[] = {"continuous", "first_step", "last_step", "gap", "coeffs", "dist_pen"};
-  ensure_only_members(params, all_fields, sizeof(all_fields)/sizeof(char*));  
-  
+  ensure_only_members(params, all_fields, sizeof(all_fields)/sizeof(char*));
+
 }
 void CollisionCostInfo::hatch(TrajOptProb& prob) {
   if (term_type == TT_COST) {
@@ -561,21 +561,23 @@ void JointConstraintInfo::fromJson(const Value& v) {
   if (vals.size() != n_dof) {
     PRINT_AND_THROW( boost::format("wrong number of dof vals. expected %i got %i")%n_dof%vals.size());
   }
+
+  childFromJson(params, coeffs, "coeffs");
   childFromJson(params, timestep, "timestep", gPCI->basic_info.n_steps-1);
-  
-  const char* all_fields[] = {"vals", "timestep"};
-  ensure_only_members(params, all_fields, sizeof(all_fields)/sizeof(char*));  
-  
+
+  const char* all_fields[] = {"vals", "coeffs", "timestep"};
+  ensure_only_members(params, all_fields, sizeof(all_fields)/sizeof(char*));
+
 }
 
 void JointConstraintInfo::hatch(TrajOptProb& prob) {
   VarVector vars = prob.GetVarRow(timestep);
   int n_dof = vars.size();
   for (int j=0; j < n_dof; ++j) {
-    prob.addLinearConstraint(exprSub(AffExpr(vars[j]), vals[j]), EQ);    
+    // prob.addLinearConstraint(exprSub(AffExpr(vars[j]), vals[j]), EQ);
+    prob.addLinearConstraint(exprMult(exprSub(AffExpr(vars[j]), vals[j]), coeffs[j]), EQ);    
   }
 }
 
 
 }
-
