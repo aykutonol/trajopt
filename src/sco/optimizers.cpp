@@ -236,6 +236,9 @@ OptStatus BasicTrustRegionSQP::optimize() {
 
   for (int merit_increases=0; merit_increases < max_merit_coeff_increases_; ++merit_increases) { /* merit adjustment loop */
     for (int iter=1; ; ++iter) { /* sqp loop */
+
+        std::cout << "\n\n\n********************\n*** TEST VERSION ***\n********************\n\n\n\n";
+
       callCallbacks(x_);
 
       LOG_DEBUG("current iterate: %s", CSTR(x_));
