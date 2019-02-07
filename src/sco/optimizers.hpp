@@ -81,21 +81,30 @@ class BasicTrustRegionSQP : public Optimizer {
    * (todo: implement penalty-based sqp that gracefully handles infeasible constraints)
    */
 public:
-  double improve_ratio_threshold_, // minimum ratio true_improve/approx_improve to accept step
-         min_trust_box_size_, // if trust region gets any smaller, exit and report convergence
-         min_approx_improve_, // if model improves less than this, exit and report convergence
-         min_approx_improve_frac_, // if model improves less than this, exit and report convergence
-         max_iter_,
-         trust_shrink_ratio_, // if improvement is less than improve_ratio_threshold, shrink trust region by this ratio
-         trust_expand_ratio_, // see above
-         cnt_tolerance_, // after convergence of penalty subproblem, if constraint violation is less than this, we're done
-         max_merit_coeff_increases_, // number of times that we jack up penalty coefficient
-         merit_coeff_increase_ratio_, // ratio that we increate coeff each time
-         max_time_ // not yet implemented
-         ;
-  double merit_error_coeff_, // initial penalty coefficient
-         trust_box_size_ // current size of trust region (component-wise)
-         ;
+    static const int maxIter = 25;
+    double improve_ratio_threshold_, // minimum ratio true_improve/approx_improve to accept step
+           min_trust_box_size_, // if trust region gets any smaller, exit and report convergence
+           min_approx_improve_, // if model improves less than this, exit and report convergence
+           min_approx_improve_frac_, // if model improves less than this, exit and report convergence
+           max_iter_,
+           trust_shrink_ratio_, // if improvement is less than improve_ratio_threshold, shrink trust region by this ratio
+           trust_expand_ratio_, // see above
+           cnt_tolerance_, // after convergence of penalty subproblem, if constraint violation is less than this, we're done
+           max_merit_coeff_increases_, // number of times that we jack up penalty coefficient
+           merit_coeff_increase_ratio_, // ratio that we increate coeff each time
+           max_time_ // not yet implemented
+           ;
+    double merit_error_coeff_, // initial penalty coefficient
+           trust_box_size_ // current size of trust region (component-wise)
+           ;
+    // SCvx parameters
+    double trr[maxIter], trrMax, trrMin,    // trust region radius and its bounds
+           L[maxIter], J[maxIter],          // approximate and true cost values
+           dL[maxIter], dJ[maxIter],        // approximate and actual improvements
+           rho[maxIter], rho0, rho1, rho2,  // similarity metric and its thresholds
+           expandR, shrinkR                 // expand and shrink ratios
+           ;
+
 
   BasicTrustRegionSQP();
   BasicTrustRegionSQP(OptProbPtr prob);
@@ -103,7 +112,7 @@ public:
   OptStatus optimize();
 protected:
   void adjustTrustRegion(double ratio);
-  void setTrustBoxConstraints(const vector<double>& x);
+  void setTrustBoxConstraints(const vector<double>& x, double trust_region_radius);
   void initParameters();
   ModelPtr model_;
 };
